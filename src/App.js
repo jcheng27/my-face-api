@@ -41,12 +41,36 @@ class App extends Component {
     super();
     this.state = {
       input: '',
-      imageUrl:'',
+      imageUrl: '',
       box: {},
       route: 'signin',
-      isSignedIn: false
+      isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
     }
   }
+
+/* Note:
+https://daveceddia.com/unexpected-token-in-json-at-position-0/
+res.send('text') use response.text()
+res.send(database.users) use response.json()
+
+app.get('/', (req,res)=> {
+  res.send('this is working');
+  res.send(database.users);
+})
+*/
+
+componentDidMount() {
+	fetch('http://localhost:1234/')
+		.then(response => response.json())
+		.then(data => console.log(data))
+}
 
 calculateFaceLocation = (apidata) => {
   const clarifaiFace = apidata.outputs[0].data.regions[0].region_info.bounding_box;
@@ -92,6 +116,21 @@ handleButtonSubmit = (event) => {
 
   app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
   .then( response => {
+        if (response) {
+          fetch('http://localhost:1234/image', {
+            method: 'put',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+  .then(response => response.text())
+  .then(count => {
+    //.this.setState(this.setState({user:{entries: count}}))
+    this.setState(Object.assign(this.state.user, { entries: count}))
+  })
+
+        }
       console.log('Response is', response.outputs[0].data.regions[0].region_info.bounding_box);
       return this.calculateFaceLocation(response);}
     )
@@ -99,6 +138,18 @@ handleButtonSubmit = (event) => {
   .catch (err => console.log(err) );
   
   console.log('click');
+}
+
+loadUser = (userdata) => {
+  this.setState ( {user: {
+      id: userdata.id,
+      name: userdata.name,
+      email: userdata.email,
+      entries: userdata.entries,
+      joined: userdata.joined   
+      }
+    }
+  )
 }
 
   render() {
@@ -113,15 +164,18 @@ handleButtonSubmit = (event) => {
         {this.state.route === 'home' ? 
           <div>
               <Logo />
-              <Rank />
+            {/*Rank displayname={this.state.user.name} displayentries={this.state.user.entries} />*/}
+              <Rank displayname={this.state.user.name} displayentries={this.state.user.entries} />
               <ImageLinkForm 
                   handleInputChange={this.handleInputChange} 
                   handleButtonSubmit={this.handleButtonSubmit} />
               <FaceRecognition imageUrl={this.state.imageUrl} boxparam={this.state.box}/>
           </div>
         : (
-            this.state.route === 'register' ? <Register handleRouteChange={this.handleRouteChange} />
-            : <SignIn handleRouteChange={this.handleRouteChange} />
+            this.state.route === 'register' 
+            //Need to pass in loadUser, or else the register and function can't do anything
+            ? <Register loadUser={this.loadUser} handleRouteChange={this.handleRouteChange} />
+            : <SignIn loadUser={this.loadUser} handleRouteChange={this.handleRouteChange} />
           )
 
 

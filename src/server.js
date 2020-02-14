@@ -1,6 +1,7 @@
 const express = require('express');
 
 const app = express();
+const cors = require('cors');
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -27,6 +28,7 @@ const database = {
 	]
 }
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req,res)=> {
@@ -45,7 +47,10 @@ bcrypt.compare("bacon", "$2b$10$S/ukIgxPEce3aQQ57MwLnOPQDzxFI4ydCLk65N5QmFaXnQxx
 
 	if (req.body.email === database.users[0].email &&
 		req.body.password === database.users[0].password) {
-		res.json('success')
+		res.json(database.users[0])
+		
+		//We need to return a user, not a just a text message that says success
+		//res.json('success')
 	} else {
 		res.status(400).json('error logging in');
 	}
@@ -66,7 +71,7 @@ app.post('/register', (req,res) => {
 		id: '125',
 		name: name,
 		email: email,
-		password, password,
+		password: password,
 		entries: 0,
 		joined: new Date()
 	})
@@ -87,7 +92,7 @@ app.get('/profile/:id' , (req,res) => {
 		}
 })
 
-app.post('/image' , (req,res)=> {
+app.put('/image' , (req,res)=> {
 	const { id } = req.body;
 	let found = false;
 	database.users.forEach(user => {
