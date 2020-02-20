@@ -124,7 +124,7 @@ handleButtonSubmit = (event) => {
               id: this.state.user.id
             })
           })
-  .then(response => response.text())
+  .then(response => response.json())
   .then(count => {
     //.this.setState(this.setState({user:{entries: count}}))
     this.setState(Object.assign(this.state.user, { entries: count}))
