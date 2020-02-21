@@ -20,9 +20,10 @@ https://www.clarifai.com/models/face-detection-image-recognition-model-a403429f2
 https://docs.clarifai.com/getting-started/getting-started/clients
 */
 
-const app = new Clarifai.App({
- apiKey: 'e228f330f1df4bad9c6c1b7bc70f578a'
-});
+// Should we?: MOVE TO IMAGE CONTROLLER to hide APIKEY
+// const app = new Clarifai.App({
+//  apiKey: 'e228f330f1df4bad9c6c1b7bc70f578a'
+// });
 
 const particlesOptions = {
             particles: {
@@ -36,10 +37,7 @@ const particlesOptions = {
             }
           }
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
+const initialState = {
       input: '',
       imageUrl: '',
       box: {},
@@ -52,8 +50,14 @@ class App extends Component {
         entries: 0,
         joined: ''
       }
-    }
-  }
+}
+
+class App extends Component {
+      constructor() {
+        super();
+        this.state = initialState;
+      }
+
 
 /* Note:
 https://daveceddia.com/unexpected-token-in-json-at-position-0/
@@ -100,7 +104,7 @@ handleInputChange = (event) => {
 
 handleRouteChange = (whichroute) => {
   if (whichroute === 'signout') {
-    this.setState({isSignedIn: false})
+    this.setState(initialState)
   }
   else if (whichroute === 'home') {
     this.setState({isSignedIn: true})
@@ -114,7 +118,15 @@ handleButtonSubmit = (event) => {
   this.setState({imageUrl: this.state.input});
   console.log('IMG URL is:', this.state.input);
 
-  app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
+  //app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
+  fetch('http://localhost:1234/imageurl', {
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              input: this.state.input
+             })
+  })
+  .then(response => response.json())
   .then( response => {
         if (response) {
           fetch('http://localhost:1234/image', {
@@ -164,7 +176,6 @@ loadUser = (userdata) => {
         {this.state.route === 'home' ? 
           <div>
               <Logo />
-            {/*Rank displayname={this.state.user.name} displayentries={this.state.user.entries} />*/}
               <Rank displayname={this.state.user.name} displayentries={this.state.user.entries} />
               <ImageLinkForm 
                   handleInputChange={this.handleInputChange} 
