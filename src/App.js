@@ -71,7 +71,8 @@ app.get('/', (req,res)=> {
 */
 
 componentDidMount() {
-	fetch('http://localhost:1234/')
+  // http://localhost:1234/
+	fetch('https://dry-tundra-76710.herokuapp.com/')
 		.then(response => response.json())
 		.then(data => console.log(data))
 }
@@ -119,7 +120,9 @@ handleButtonSubmit = (event) => {
   console.log('IMG URL is:', this.state.input);
 
   //app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
-  fetch('http://localhost:1234/imageurl', {
+
+  // http://localhost:1234/imageurl
+  fetch('https://dry-tundra-76710.herokuapp.com/imageurl', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -129,7 +132,8 @@ handleButtonSubmit = (event) => {
   .then(response => response.json())
   .then( response => {
         if (response) {
-          fetch('http://localhost:1234/image', {
+          // http://localhost:1234/image 
+          fetch('https://dry-tundra-76710.herokuapp.com/image', {
             method: 'put',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
